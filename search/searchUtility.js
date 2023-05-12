@@ -1,5 +1,6 @@
 import fs from "fs";
 import { ROOT_DIRECTORY, clinicsUnifiedNamesMap } from "./constants.js";
+import JSONStream from "JSONStream";
 
 const formatQuery = (rawQuery) => {
   const formattedQuery = {};
@@ -23,39 +24,19 @@ const formatQuery = (rawQuery) => {
   return formattedQuery;
 };
 
-const streamFile = async (folderPath) => {
+const searchStream = (clinic, query) => {
   try {
-    let data = [];
-    const files = fs.readdirSync(ROOT_DIRECTORY + folderPath);
-    for (const file of files) {
-      const json = fs.readFileSync(ROOT_DIRECTORY + folderPath + file, {
-        encoding: "utf8",
-        flag: "r",
-      });
-      data.push(JSON.parse(json));
-    }
-    return data.reduce((prev, curr) => prev.concat(curr), []);
-  } catch (error) {
-    console.log("[search][searchUtility.js] failed to streamFile\n", error);
-  }
-};
-
-const searchStream = (data, query) => {
-  try {
-    const result = [];
-    data.forEach((clinic) => {
-      Object.keys(clinic).forEach((key) => {
-        const unifiedKey = clinicsUnifiedNamesMap[key];
-        if (!query[unifiedKey]) return;
-        if (unifiedKey !== "availability" && query[unifiedKey] === clinic[key])
-          result.push(clinic);
-        else if (unifiedKey === "availability") {
-          if (areDatesOverlapping(clinic[key], query[unifiedKey]))
-            result.push(clinic);
-        }
-      });
+    let isMatching = true;
+    Object.keys(clinic).forEach((key) => {
+      const unifiedKey = clinicsUnifiedNamesMap[key];
+      if (!query[unifiedKey]) return;
+      if (unifiedKey !== "availability")
+        isMatching = isMatching && query[unifiedKey] === clinic[key];
+      else if (unifiedKey === "availability")
+        isMatching =
+          isMatching && areDatesOverlapping(clinic[key], query[unifiedKey]);
     });
-    return result;
+    return isMatching ? clinic : undefined;
   } catch (error) {
     console.log("[search][searchUtility.js] failed to searchStream\n", error);
   }
@@ -76,4 +57,30 @@ const areDatesOverlapping = (date, queryDate) => {
     console.log("[search][searchUtility.js] failed to convertDates\n", error);
   }
 };
-export { streamFile, searchStream, formatQuery };
+
+const processJSONFile = (files, query, callback) => {
+  const resultArray = [];
+  let fileCount = files.length;
+  let processedFiles = 0;
+
+  files.forEach((file) => {
+    const stream = fs.createReadStream(file, { encoding: "utf8" });
+    const jsonStream = JSONStream.parse("*");
+
+    jsonStream.on("data", (obj) => {
+      const clinic = searchStream(obj, query);
+      clinic && resultArray.push(clinic);
+    });
+
+    jsonStream.on("end", () => {
+      processedFiles++;
+      if (processedFiles === fileCount) {
+        callback(resultArray);
+      }
+    });
+
+    stream.pipe(jsonStream);
+  });
+};
+
+export { searchStream, formatQuery, processJSONFile };
