@@ -1,13 +1,20 @@
 import fs from "fs";
-import { ROOT_DIRECTORY, clinicsUnifiedNamesMap } from "./constants.js";
+import { clinicsUnifiedNamesMap } from "./constants.js";
 import JSONStream from "JSONStream";
 
+// formatQuery: formats query from the user to a unified query to be used on all clinics
 const formatQuery = (rawQuery) => {
   const formattedQuery = {};
   Object.keys(rawQuery).forEach((key) => {
     const unifiedKey = clinicsUnifiedNamesMap[key];
     formattedQuery[unifiedKey] = rawQuery[key];
   });
+  convertDate(formattedQuery);
+  return formattedQuery;
+};
+
+// convertDate: converts the date from string type to an array of two dates
+const convertDate = (formattedQuery) => {
   if (formattedQuery["availability"]) {
     formattedQuery["availability"] = JSON.parse(formattedQuery["availability"]);
     formattedQuery["availability"][0] = new Date().setHours(
@@ -21,9 +28,9 @@ const formatQuery = (rawQuery) => {
         "[search][searchUtility.js] first date can't be bigger than second date"
       );
   }
-  return formattedQuery;
 };
 
+// searchStream: takes a clinic object and checks if it met all query criteria
 const searchStream = (clinic, query) => {
   try {
     let isMatching = true;
@@ -42,6 +49,7 @@ const searchStream = (clinic, query) => {
   }
 };
 
+// areDatesOverlapping: a helper function to check if the two dates meet
 const areDatesOverlapping = (date, queryDate) => {
   try {
     const clinicFrom = new Date().setHours(...date["from"].split(":"));
@@ -58,6 +66,7 @@ const areDatesOverlapping = (date, queryDate) => {
   }
 };
 
+// processJSONFile: takes files to process using streams and apply query to their data chunks and returns the result using callback
 const processJSONFile = (files, query, callback) => {
   const resultArray = [];
   let fileCount = files.length;

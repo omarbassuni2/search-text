@@ -7,7 +7,7 @@ const search = async (req, res) => {
     const query = formatQuery(req.query);
     const files = await fs
       .readdirSync(ROOT_DIRECTORY + FOLDER_PATH)
-      .map((ele) => ROOT_DIRECTORY + FOLDER_PATH + ele);
+      .map((ele) => ROOT_DIRECTORY + FOLDER_PATH + ele); // reads path of all json files inside data folder to be passed to our stream
     processJSONFile(files, query, (resultArray) => {
       res.json(resultArray);
     });
