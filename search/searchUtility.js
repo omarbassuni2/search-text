@@ -9,25 +9,23 @@ const formatQuery = (rawQuery) => {
     const unifiedKey = clinicsUnifiedNamesMap[key];
     formattedQuery[unifiedKey] = rawQuery[key];
   });
-  convertDate(formattedQuery);
+  if (formattedQuery["availability"]) convertDate(formattedQuery);
   return formattedQuery;
 };
 
 // convertDate: converts the date from string type to an array of two dates
 const convertDate = (formattedQuery) => {
-  if (formattedQuery["availability"]) {
-    formattedQuery["availability"] = JSON.parse(formattedQuery["availability"]);
-    formattedQuery["availability"][0] = new Date().setHours(
-      ...formattedQuery["availability"][0].split(":")
+  formattedQuery["availability"] = JSON.parse(formattedQuery["availability"]);
+  formattedQuery["availability"][0] = new Date().setHours(
+    ...formattedQuery["availability"][0].split(":")
+  );
+  formattedQuery["availability"][1] = new Date().setHours(
+    ...formattedQuery["availability"][1].split(":")
+  );
+  if (formattedQuery["availability"][0] > formattedQuery["availability"][1])
+    throw new Error(
+      "[search][searchUtility.js] first date can't be bigger than second date"
     );
-    formattedQuery["availability"][1] = new Date().setHours(
-      ...formattedQuery["availability"][1].split(":")
-    );
-    if (formattedQuery["availability"][0] > formattedQuery["availability"][1])
-      throw new Error(
-        "[search][searchUtility.js] first date can't be bigger than second date"
-      );
-  }
 };
 
 // searchStream: takes a clinic object and checks if it met all query criteria

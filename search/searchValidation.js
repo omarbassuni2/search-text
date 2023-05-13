@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const querySchema = Joi.object({
+export const querySchema = Joi.object({
   clinicName: Joi.string().optional(),
   stateName: Joi.string().optional(),
   availability: Joi.string()
