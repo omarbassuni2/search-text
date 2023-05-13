@@ -1,0 +1,59 @@
+{
+	"info": {
+		"_postman_id": "c9957427-168d-437e-97d2-02de2a1f18c4",
+		"name": "search api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/?stateName=Florida&availability=[\"10:00\", \"20:59\"]",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "clinicName",
+							"value": "Hopkins Hospital Baltimore",
+							"disabled": true
+						},
+						{
+							"key": "stateName",
+							"value": "Florida"
+						},
+						{
+							"key": "availability",
+							"value": "[\"10:00\", \"20:59\"]"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
