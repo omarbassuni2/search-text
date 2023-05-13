@@ -1,7 +1,6 @@
 import fs from "fs";
 import { ROOT_DIRECTORY } from "../constants.js";
 import { processJSONFile } from "../searchUtility.js";
-import Joi from "joi";
 import { querySchema } from "../searchValidation.js";
 
 export const processJSONFileTest = async (query) => {
